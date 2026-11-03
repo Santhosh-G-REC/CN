@@ -1,0 +1,933 @@
+COMPUTER NETWORKS LAB - QUESTION 1
+PACKET TRACER + WIRESHARK + NMAP
+AIM / PROCEDURE / CONFIGURATION / OUTPUT
+========================================
+
+IMPORTANT
+---------
+This guide follows the Question 1 practical types in your uploaded CN lab question bank.
+Question 1 mainly contains Cisco Packet Tracer, Wireshark and Nmap tasks.
+Read the question carefully and change the IP addresses/topology to match the values given.
+
+============================================================
+SECTION A - CISCO PACKET TRACER
+============================================================
+
+GENERAL PACKET TRACER PROCEDURE
+-------------------------------
+1. Open Cisco Packet Tracer.
+2. Place the required devices in the workspace.
+3. Connect devices using the correct cable.
+4. Configure IP address and subnet mask on every PC.
+5. Configure router interfaces if a router is used.
+6. Configure default gateway on PCs when communication crosses networks.
+7. Change to Simulation mode if the question asks to observe packet movement.
+8. Click Add Simple PDU (envelope icon), then click source PC and destination PC.
+9. Check whether the packet is successful.
+10. Use ping from PC -> Desktop -> Command Prompt to verify connectivity.
+
+COMMON CABLES
+-------------
+PC to Hub: Copper Straight-Through
+PC to Switch: Copper Straight-Through
+Switch to Router Ethernet: Copper Straight-Through
+Hub to Switch: Copper Cross-Over or Automatic
+Router to Router Serial: Serial DCE/DTE cable
+Laptop to Wireless Router: Wireless connection
+Wireless Router to Cable Modem: Copper Straight-Through
+Cable Modem to Cloud: Coaxial cable if supported by the selected devices
+
+PC IP CONFIGURATION
+-------------------
+1. Click the PC.
+2. Select Desktop.
+3. Open IP Configuration.
+4. Select Static.
+5. Enter IP Address.
+6. Enter Subnet Mask.
+7. Enter Default Gateway if required.
+8. Close the window.
+
+To test:
+Desktop -> Command Prompt
+ping <destination-IP>
+
+------------------------------------------------------------
+1. HUB WITH FOUR PCs
+------------------------------------------------------------
+AIM:
+To build a LAN using one hub and four PCs and observe how the hub forwards a frame.
+
+DEVICES: 1 Hub, 4 PCs (PC0 to PC3)
+
+IP CONFIGURATION:
+PC0: 192.168.1.1    Mask: 255.255.255.0
+PC1: 192.168.1.2    Mask: 255.255.255.0
+PC2: 192.168.1.3    Mask: 255.255.255.0
+PC3: 192.168.1.4    Mask: 255.255.255.0
+
+PROCEDURE:
+1. Place one hub and four PCs.
+2. Connect each PC to the hub using Copper Straight-Through cables.
+3. Configure the IP addresses and subnet masks shown above.
+4. Change to Simulation mode.
+5. Select Add Simple PDU.
+6. Click PC0 and then PC3.
+7. Observe packet movement in the Simulation panel.
+8. Record how the hub forwards the frame to its other ports.
+
+EXPECTED OUTPUT / OBSERVATION:
+The hub repeats the incoming signal to all other connected ports. All connected devices receive the signal, but only the destination PC processes the frame.
+
+------------------------------------------------------------
+2. SWITCH WITH FOUR PCs
+------------------------------------------------------------
+AIM:
+To build a LAN using a switch and four PCs and observe frame forwarding and the MAC address table.
+
+DEVICES: 1 Switch, 4 PCs (PC0 to PC3)
+
+IP CONFIGURATION:
+PC0: 10.1.1.1    Mask: 255.255.255.0
+PC1: 10.1.1.2    Mask: 255.255.255.0
+PC2: 10.1.1.3    Mask: 255.255.255.0
+PC3: 10.1.1.4    Mask: 255.255.255.0
+
+PROCEDURE:
+1. Place one switch and four PCs.
+2. Connect each PC to the switch using Copper Straight-Through cables.
+3. Configure the IP addresses and subnet masks.
+4. Change to Simulation mode.
+5. Send a Simple PDU from PC0 to PC2.
+6. Observe how the switch forwards the frame.
+7. Click the switch and open its CLI.
+8. Enter:
+   enable
+   show mac address-table
+9. Observe the learned MAC addresses and their switch ports.
+
+EXPECTED OUTPUT / OBSERVATION:
+The switch learns source MAC addresses and forwards a known unicast frame through the destination port. Initially, it may flood an unknown unicast frame.
+
+------------------------------------------------------------
+3. HUB AND SWITCH COMPARISON
+------------------------------------------------------------
+AIM:
+To compare the working of a hub and a switch in Packet Tracer.
+
+DEVICES: 1 Hub, 1 Switch, 6 PCs
+CONNECTION:
+PC0, PC1 and PC2 -> Hub
+PC3, PC4 and PC5 -> Switch
+Connect Hub to Switch.
+
+IP NETWORK: 192.168.10.0/24
+Sample IP addresses:
+PC0: 192.168.10.1
+PC1: 192.168.10.2
+PC2: 192.168.10.3
+PC3: 192.168.10.4
+PC4: 192.168.10.5
+PC5: 192.168.10.6
+Subnet mask for all: 255.255.255.0
+
+PROCEDURE:
+1. Place one hub, one switch and six PCs.
+2. Connect PC0-PC2 to the hub.
+3. Connect PC3-PC5 to the switch.
+4. Connect the hub to the switch.
+5. Configure the IP addresses.
+6. Send a Simple PDU from PC0 to PC1.
+7. Observe the packet inside the hub segment.
+8. Send another Simple PDU from PC0 to PC4.
+9. Observe how the packet travels through the hub and switch.
+10. Compare the observations.
+
+EXPECTED OUTPUT / OBSERVATION:
+Hub: repeats signals to all other ports.
+Switch: learns MAC addresses and forwards frames to the required port when the destination is known.
+
+------------------------------------------------------------
+4. 8-PORT SWITCH WITH FOUR PCs AND MANAGEMENT IP
+------------------------------------------------------------
+AIM:
+To configure a LAN using an 8-port switch and four PCs and test connectivity.
+
+IP CONFIGURATION:
+PC1: 10.1.1.1    Mask: 255.0.0.0
+PC2: 10.1.1.2    Mask: 255.0.0.0
+PC3: 10.1.1.3    Mask: 255.0.0.0
+PC4: 10.1.1.4    Mask: 255.0.0.0
+Switch management IP: 10.1.1.5
+
+PROCEDURE:
+1. Place one 8-port switch and four PCs.
+2. Connect all PCs to the switch using Copper Straight-Through cables.
+3. Configure PC1-PC4 with the given IP addresses and mask.
+4. Configure the switch management IP through its CLI, if the model supports a VLAN interface:
+   enable
+   configure terminal
+   interface vlan 1
+   ip address 10.1.1.5 255.0.0.0
+   no shutdown
+   exit
+5. Configure a default gateway only if managing the switch from another network.
+6. Test PC-to-PC connectivity using ping.
+7. Test PC-to-switch management IP using ping.
+
+EXPECTED OUTPUT:
+Successful ping replies indicate connectivity between the PCs and the switch management interface.
+
+------------------------------------------------------------
+5. SIMPLE PC AND SWITCH INITIAL CONFIGURATION
+------------------------------------------------------------
+AIM:
+To create the given simple topology and configure the PCs and switch.
+
+PROCEDURE:
+1. Reproduce the topology shown in the question paper.
+2. Place the PCs and switch in the same arrangement.
+3. Connect each PC to the switch with Copper Straight-Through cable.
+4. Configure each PC with the IP address and subnet mask shown in the question.
+5. If switch management is required, configure its VLAN 1 IP address through CLI.
+6. Test connectivity using ping between the PCs.
+7. Record successful replies.
+
+NOTE:
+Use the exact diagram and IP values printed in the question. The extracted question text does not provide readable IP values for this diagram.
+
+------------------------------------------------------------
+6. TWO SUBNETS - COMPARE WITH AND WITHOUT ROUTER
+------------------------------------------------------------
+AIM:
+To compare packet transmission between two different subnets before and after connecting a router.
+
+NETWORKS:
+Subnet A: 172.16.1.0/24
+Subnet B: 172.16.2.0/24
+Each subnet has one switch and three PCs.
+
+SAMPLE CONFIGURATION:
+Subnet A:
+PC0: 172.16.1.2 /24, Gateway 172.16.1.1
+PC1: 172.16.1.3 /24, Gateway 172.16.1.1
+PC2: 172.16.1.4 /24, Gateway 172.16.1.1
+
+Subnet B:
+PC3: 172.16.2.2 /24, Gateway 172.16.2.1
+PC4: 172.16.2.3 /24, Gateway 172.16.2.1
+PC5: 172.16.2.4 /24, Gateway 172.16.2.1
+
+Router:
+Interface for Subnet A: 172.16.1.1/24
+Interface for Subnet B: 172.16.2.1/24
+
+PROCEDURE:
+1. Place two switches and six PCs.
+2. Connect three PCs to each switch.
+3. Configure the IP addresses for both subnets.
+4. First, do not connect a router.
+5. Send a Simple PDU from a PC in Subnet A to a PC in Subnet B.
+6. Observe that communication between different subnets fails without a router.
+7. Add a router and connect one interface to each switch.
+8. Configure router interface IP addresses as shown above.
+9. Enable both router interfaces using no shutdown.
+10. Set each PC's default gateway to its router interface address.
+11. Send the PDU again and observe successful packet transmission.
+
+EXPECTED OUTPUT:
+Without router: different subnets cannot communicate.
+With router and correct gateways: communication succeeds.
+
+------------------------------------------------------------
+7. FOUR SUBNETS FROM 192.168.10.0/24
+------------------------------------------------------------
+AIM:
+To divide 192.168.10.0/24 into four equal subnets, connect them to a router and test connectivity.
+
+SUBNETTING:
+Original network: 192.168.10.0/24
+Four equal subnets require /26.
+Subnet mask: 255.255.255.192
+
+FOUR SUBNETWORKS:
+Subnet 1: 192.168.10.0/26
+Usable hosts: 192.168.10.1 - 192.168.10.62
+Broadcast: 192.168.10.63
+
+Subnet 2: 192.168.10.64/26
+Usable hosts: 192.168.10.65 - 192.168.10.126
+Broadcast: 192.168.10.127
+
+Subnet 3: 192.168.10.128/26
+Usable hosts: 192.168.10.129 - 192.168.10.190
+Broadcast: 192.168.10.191
+
+Subnet 4: 192.168.10.192/26
+Usable hosts: 192.168.10.193 - 192.168.10.254
+Broadcast: 192.168.10.255
+
+PROCEDURE:
+1. Place one router, four switches and at least two PCs per subnet.
+2. Connect each switch to a separate router interface. If the router has insufficient Ethernet interfaces, use a suitable supported module or topology allowed by your lab.
+3. Assign two valid host IP addresses from each subnet to its PCs.
+4. Assign one valid IP address from each subnet to the corresponding router interface.
+5. Set the router interface subnet mask to 255.255.255.192.
+6. Enable the interfaces using no shutdown.
+7. Set each PC's default gateway to the router interface in its subnet.
+8. Send Simple PDUs between devices in different subnets.
+9. Verify using ping.
+
+EXPECTED OUTPUT:
+All four subnets should communicate through the router when interfaces, IP addresses and gateways are configured correctly.
+
+------------------------------------------------------------
+8. SIMPLE INTERNETWORK USING ONE ROUTER AND TWO PCs
+------------------------------------------------------------
+AIM:
+To connect two different networks using one router in Packet Tracer.
+
+ROUTER CONFIGURATION:
+FastEthernet0/0: 192.168.10.1/24
+FastEthernet0/1: 192.168.20.1/24
+
+PC CONFIGURATION:
+PC0: 192.168.10.2/24, Gateway 192.168.10.1
+PC1: 192.168.20.2/24, Gateway 192.168.20.1
+
+PROCEDURE:
+1. Place one router and two PCs.
+2. Connect PC0 to Router Fa0/0.
+3. Connect PC1 to Router Fa0/1.
+4. Use Copper Straight-Through cables.
+5. Configure the PC IP addresses, masks and gateways.
+6. Open router CLI and enter:
+   enable
+   configure terminal
+   interface fastethernet 0/0
+   ip address 192.168.10.1 255.255.255.0
+   no shutdown
+   exit
+   interface fastethernet 0/1
+   ip address 192.168.20.1 255.255.255.0
+   no shutdown
+   end
+7. Send a Simple PDU from PC0 to PC1.
+8. Verify using ping.
+
+EXPECTED OUTPUT:
+The router routes packets between the two directly connected networks.
+
+------------------------------------------------------------
+9. TWO LANs THROUGH SWITCHES AND A ROUTER
+------------------------------------------------------------
+AIM:
+To design two LANs connected through a router and trace packet routing.
+
+NETWORK A: 10.10.1.0/24
+NETWORK B: 10.10.2.0/24
+
+ROUTER GATEWAYS:
+R1 Fa0/0: 10.10.1.1/24
+R1 Fa0/1: 10.10.2.1/24
+
+SAMPLE PCs:
+Network A: 10.10.1.2, 10.10.1.3, 10.10.1.4
+Network B: 10.10.2.2, 10.10.2.3, 10.10.2.4
+Mask: 255.255.255.0
+Network A gateway: 10.10.1.1
+Network B gateway: 10.10.2.1
+
+PROCEDURE:
+1. Place one router, two switches and six PCs.
+2. Connect three PCs to each switch.
+3. Connect each switch to a different router Ethernet interface.
+4. Configure router interface IP addresses and enable them.
+5. Configure static IP addresses on all PCs.
+6. Set the correct default gateway on every PC.
+7. Select Simulation mode.
+8. Send a Simple PDU from Network A to Network B.
+9. Use Capture/Forward to trace the packet through the router.
+
+EXPECTED OUTPUT:
+The packet travels from the source LAN to the router and then to the destination LAN.
+
+------------------------------------------------------------
+10. TWO LANs - 192.168.1.0/24 AND 192.168.2.0/24
+------------------------------------------------------------
+AIM:
+To connect two LANs using two switches and one router and verify with ping and tracert.
+
+NETWORKS:
+LAN-A: 192.168.1.0/24
+LAN-B: 192.168.2.0/24
+Router R1: 192.168.1.1 and 192.168.2.1 as gateways
+
+PROCEDURE:
+1. Place one router, two switches and six PCs.
+2. Connect three PCs to each switch.
+3. Connect both switches to separate router interfaces.
+4. Configure router interfaces with 192.168.1.1 and 192.168.2.1.
+5. Enable both interfaces.
+6. Assign LAN-A PCs addresses in 192.168.1.0/24 and gateway 192.168.1.1.
+7. Assign LAN-B PCs addresses in 192.168.2.0/24 and gateway 192.168.2.1.
+8. Test using ping between the LANs.
+9. Use tracert <destination-IP> from a PC to observe the route.
+
+EXPECTED OUTPUT:
+Ping should succeed. Tracert should show the router as the path between the two LANs.
+
+------------------------------------------------------------
+11. STATIC ROUTING - TWO ROUTERS AND SERIAL LINK
+------------------------------------------------------------
+AIM:
+To configure static routing between two LANs connected by two routers.
+
+NETWORK DETAILS:
+LAN1: 10.1.1.0/24
+LAN2: 10.2.2.0/24
+Serial link: 192.168.100.0/30
+
+SAMPLE ADDRESSING:
+R1 LAN interface: 10.1.1.1/24
+PC0: 10.1.1.2/24, Gateway 10.1.1.1
+R1 Serial: 192.168.100.1/30
+R2 Serial: 192.168.100.2/30
+R2 LAN interface: 10.2.2.1/24
+PC1: 10.2.2.2/24, Gateway 10.2.2.1
+
+PROCEDURE:
+1. Place two routers and two PCs.
+2. Connect each PC to its router LAN interface.
+3. Connect the routers using a Serial DCE cable.
+4. Configure IP addresses on PC and router interfaces.
+5. On the DCE serial side, configure a clock rate if required:
+   clock rate 64000
+6. Enable all router interfaces using no shutdown.
+7. Add a static route on R1 to reach LAN2:
+   ip route 10.2.2.0 255.255.255.0 192.168.100.2
+8. Add a static route on R2 to reach LAN1:
+   ip route 10.1.1.0 255.255.255.0 192.168.100.1
+9. Check routing tables:
+   show ip route
+10. Ping from PC0 to PC1.
+
+EXPECTED OUTPUT:
+The two PCs should communicate through the serial link using static routes.
+
+------------------------------------------------------------
+12. STATIC ROUTING - THREE ROUTERS WITH MAIN AND BACKUP ROUTE
+------------------------------------------------------------
+AIM:
+To configure a main and backup static route to network 30.0.0.0/8.
+
+QUESTION NETWORK:
+Three routers form a triangle.
+Router0 connects to 10.0.0.0/8 (PC0), Router1 through 20.0.0.0/8 and Router2 through 40.0.0.0/8.
+Router1 connects to 30.0.0.0/8 (PC1) and Router2 through 50.0.0.0/8.
+
+PROCEDURE:
+1. Place three routers and the PCs shown in the question.
+2. Connect the routers in a triangle using the links shown.
+3. Configure all router interface IP addresses according to the topology.
+4. Configure the PC IP addresses and default gateways.
+5. Enable all router interfaces.
+6. On Router0, configure the main static route to 30.0.0.0/8 through Router1 with administrative distance 10.
+7. Configure the backup route through Router2 with administrative distance 20.
+8. General command format:
+   ip route 30.0.0.0 255.0.0.0 <next-hop-via-Router1> 10
+   ip route 30.0.0.0 255.0.0.0 <next-hop-via-Router2> 20
+9. Use show ip route to verify the installed route.
+10. Test connectivity using ping.
+
+EXPECTED OUTPUT:
+The route with lower administrative distance (10) is preferred. The route with distance 20 acts as the backup.
+
+NOTE:
+Use the exact next-hop IP addresses from the diagram/question. They are not fully specified in the extracted text.
+
+------------------------------------------------------------
+13. RIP ROUTING - THREE ROUTERS IN A TRIANGLE
+------------------------------------------------------------
+AIM:
+To configure RIP routing among three routers and verify connectivity.
+
+QUESTION NETWORK:
+Three routers connected in a triangle using serial links from the 192.168.1.0/30 series.
+PC0: 10.0.0.2/8; Router0 Fa0/1: 10.0.0.1/8
+PC1: 20.0.0.2 (question text gives /30); Router2 Fa0/1: 20.0.0.1 (question text gives /30)
+
+PROCEDURE:
+1. Place three routers and two PCs.
+2. Connect the routers in a triangle using serial links.
+3. Connect PC0 to Router0 and PC1 to Router2.
+4. Configure all serial and LAN interface IP addresses according to the question.
+5. Enable each interface using no shutdown.
+6. On each router, enable RIP:
+   enable
+   configure terminal
+   router rip
+   version 2
+   no auto-summary
+7. Add network statements for the networks directly connected to that router. Example:
+   network 10.0.0.0
+   network 20.0.0.0
+   network 192.168.1.0
+8. Repeat with the correct connected networks on each router.
+9. Check the routing table:
+   show ip route
+10. Test connectivity between PC0 and PC1 using ping.
+
+EXPECTED OUTPUT:
+RIP routers exchange route information and learn remote networks. Ping should succeed when addressing and network statements are correct.
+
+NOTE:
+The extracted question text has a potentially inconsistent mask for PC1 and serial-link address sequence. Follow the actual diagram/instructions provided by your examiner.
+
+------------------------------------------------------------
+14. RIP ROUTING - VERIFY ROUTING TABLES
+------------------------------------------------------------
+AIM:
+To simulate RIP in Packet Tracer and verify dynamically learned routes.
+
+PROCEDURE:
+1. Build the three-router triangle topology shown in the question.
+2. Configure router-to-router serial links.
+3. Configure LAN interfaces and PC IP addresses.
+4. Enable and configure RIP on all routers.
+5. Advertise each router's directly connected networks.
+6. Use show ip route to view learned routes.
+7. Check for routes marked with R.
+8. Ping between PCs on different LANs.
+
+EXPECTED OUTPUT:
+The routing table displays RIP-learned routes marked with R, and end-to-end ping succeeds if configuration is correct.
+
+------------------------------------------------------------
+15. WIRELESS ROUTER, DHCP, MODEM AND INTERNET CLOUD
+------------------------------------------------------------
+AIM:
+To design an internetwork using a wireless router, DHCP, cable modem, Internet cloud and server.
+
+QUESTION DETAILS:
+Wireless router LAN IP: 192.168.0.1/24
+PC: wired
+Laptop: wireless
+Server: 208.67.220.220/24
+
+PROCEDURE:
+1. Place a wireless router, one PC, one laptop, cable modem, Internet cloud and server.
+2. Connect the wired PC to a LAN port of the wireless router.
+3. Connect the laptop to the wireless router using its wireless interface.
+4. Connect the wireless router Internet port to the cable modem.
+5. Connect the modem to the Internet cloud.
+6. Connect the cloud to the server as shown in the question.
+7. Configure the wireless router LAN IP as 192.168.0.1 with mask 255.255.255.0.
+8. Enable DHCP on the wireless router.
+9. Configure the wireless SSID and security if required.
+10. Connect the laptop to the SSID.
+11. Set both PC and laptop to obtain IP addresses automatically (DHCP).
+12. Configure the server with IP 208.67.220.220 and mask 255.255.255.0.
+13. Configure Internet/WAN addressing and routing as required by the Packet Tracer cloud/modem topology.
+14. Test connectivity to the server.
+
+EXPECTED OUTPUT:
+The wired PC and wireless laptop receive DHCP addresses and should reach the server when the WAN/cloud path is configured correctly.
+
+------------------------------------------------------------
+16. DHCP SERVER CONFIGURATION
+------------------------------------------------------------
+AIM:
+To configure a DHCP server and allow four PCs to obtain IP addresses automatically.
+
+QUESTION DETAILS:
+Server0 IP: 192.168.1.2/24
+Default gateway: 192.168.1.1
+DNS server: 8.8.8.8
+Start IP address: 192.168.1.10
+Maximum users: 50
+
+PROCEDURE:
+1. Place one server, one switch and four PCs.
+2. Connect all devices to the switch.
+3. Configure Server0 with static IP 192.168.1.2 and mask 255.255.255.0.
+4. Set its default gateway to 192.168.1.1.
+5. Open Server0 -> Services -> DHCP.
+6. Turn DHCP service ON.
+7. Enter the pool details:
+   Default Gateway: 192.168.1.1
+   DNS Server: 8.8.8.8
+   Start IP Address: 192.168.1.10
+   Subnet Mask: 255.255.255.0
+   Maximum Number of Users: 50
+8. Save or add the DHCP pool.
+9. Open each PC -> Desktop -> IP Configuration.
+10. Select DHCP.
+11. Check that each PC receives an address automatically.
+12. Verify leased addresses and test connectivity.
+
+EXPECTED OUTPUT:
+Each PC receives an IP address from the DHCP pool.
+
+IMPORTANT NOTE:
+The stated gateway 192.168.1.1 must exist on a router or Layer 3 interface for off-subnet communication. Configure that gateway device if the topology requires it.
+
+============================================================
+SECTION B - WIRESHARK
+============================================================
+
+GENERAL WIRESHARK PROCEDURE
+---------------------------
+1. Open Wireshark.
+2. Select the active network interface (Wi-Fi or Ethernet).
+3. Double-click the interface to start capturing.
+4. Generate the required traffic (browse a website, ping, nslookup, renew DHCP, etc.).
+5. Enter the required display filter in the filter bar.
+6. Press Enter to apply the filter.
+7. Select a packet and expand the required protocol fields.
+8. If asked for a flow graph, choose Statistics -> Flow Graph.
+9. Save the capture using File -> Save As.
+
+COMMON DISPLAY FILTERS
+----------------------
+TCP:   tcp
+UDP:   udp
+ARP:   arp
+DNS:   dns
+HTTP:  http
+ICMP:  icmp
+DHCP:  dhcp (or bootp on some Wireshark versions)
+IP:    ip
+
+------------------------------------------------------------
+17. WIRESHARK - TCP PACKET CAPTURE
+------------------------------------------------------------
+AIM:
+To capture TCP packets, inspect TCP header fields and display a flow graph.
+
+PROCEDURE:
+1. Open Wireshark and select the active LAN interface.
+2. Start capturing packets.
+3. Browse any website to generate TCP traffic.
+4. Stop capture after collecting about 100 packets.
+5. Enter display filter: tcp
+6. Select a TCP packet.
+7. Expand Transmission Control Protocol.
+8. Note Source Port, Destination Port, Sequence Number, Acknowledgement Number and Flags.
+9. Select Statistics -> Flow Graph.
+10. Save the capture file.
+
+EXPECTED OUTPUT:
+TCP packets are displayed with source/destination ports, sequence and acknowledgement numbers, and flags.
+
+------------------------------------------------------------
+18. WIRESHARK - ARP PACKETS
+------------------------------------------------------------
+AIM:
+To capture and inspect ARP request and ARP reply packets.
+
+PROCEDURE:
+1. Open Wireshark and select the active interface.
+2. Start capturing.
+3. Open Command Prompt as administrator if needed.
+4. Clear the ARP cache using the command supported by your OS. On Windows:
+   arp -d *
+5. Ping the default gateway: ping <gateway-IP>
+6. Return to Wireshark and apply: arp
+7. Select the ARP request and inspect Opcode, Sender MAC, Sender IP, Target MAC and Target IP.
+8. Select the ARP reply and inspect the same fields.
+9. Explain whether ARP has a transport-layer header.
+
+EXPECTED OUTPUT / VIVA POINT:
+ARP resolves an IPv4 address to a MAC address. It is not carried inside TCP or UDP, so it has no transport-layer header.
+
+------------------------------------------------------------
+19. WIRESHARK - DNS PACKETS
+------------------------------------------------------------
+AIM:
+To capture DNS query and response packets and inspect DNS traffic.
+
+PROCEDURE:
+1. Open Wireshark and start capturing on the active interface.
+2. Open Command Prompt.
+3. Run: nslookup www.google.com
+4. Return to Wireshark.
+5. Apply display filter: dns
+6. Select the DNS query packet and inspect the queried domain name and query type.
+7. Select the DNS response packet and inspect the response and returned IP address.
+8. Note the transport protocol and port number.
+9. Select Statistics -> Flow Graph if asked.
+
+EXPECTED OUTPUT:
+DNS query and response packets appear. DNS commonly uses UDP port 53; TCP port 53 is also used in some cases.
+
+------------------------------------------------------------
+20. WIRESHARK - HTTP PACKETS
+------------------------------------------------------------
+AIM:
+To capture HTTP GET requests and HTTP 200 OK responses.
+
+PROCEDURE:
+1. Open Wireshark and start capturing.
+2. Open a website that uses plain HTTP, if available.
+3. Apply display filter: http
+4. Find an HTTP GET request.
+5. Inspect the request method and host/path fields.
+6. Find the HTTP response and inspect the status code, such as 200 OK.
+7. Right-click a packet and select Follow -> TCP Stream.
+8. Observe the request and response conversation.
+
+EXPECTED OUTPUT:
+HTTP GET and HTTP response packets are visible when unencrypted HTTP traffic is available.
+NOTE: Most websites use HTTPS. Encrypted HTTPS traffic will not display readable HTTP GET/200 OK details with the simple http filter.
+
+------------------------------------------------------------
+21. WIRESHARK - IP AND ICMP PACKETS
+------------------------------------------------------------
+AIM:
+To capture ICMP Echo Request and Echo Reply packets and inspect their fields.
+
+PROCEDURE:
+1. Open Wireshark and start capturing.
+2. Open Command Prompt.
+3. Run: ping 8.8.8.8
+4. Return to Wireshark and apply: icmp
+5. Select an Echo Request packet.
+6. Inspect Type, Code, Identifier, Sequence Number and TTL (in the IP header).
+7. Select the Echo Reply packet and inspect the same fields.
+
+EXPECTED OUTPUT:
+Echo Request and Echo Reply packets appear if the ping succeeds and ICMP traffic is not blocked.
+
+------------------------------------------------------------
+22. WIRESHARK - DHCP PACKETS
+------------------------------------------------------------
+AIM:
+To capture DHCP Discover, Offer, Request and Acknowledgement messages.
+
+PROCEDURE:
+1. Open Wireshark and start capturing on the active interface.
+2. Open Command Prompt as administrator.
+3. Run:
+   ipconfig /release
+   ipconfig /renew
+4. Return to Wireshark.
+5. Apply display filter: dhcp (on some versions use bootp).
+6. Identify Discover, Offer, Request and Acknowledgement (ACK).
+7. Observe source/destination IP addresses and DHCP details.
+
+EXPECTED OUTPUT:
+The DHCP DORA sequence is displayed when the client obtains or renews an address using DHCP.
+
+------------------------------------------------------------
+23. WIRESHARK - UDP PACKETS
+------------------------------------------------------------
+AIM:
+To capture UDP packets and inspect their header fields and flow graph.
+
+PROCEDURE:
+1. Open Wireshark and select the active interface.
+2. Start capturing.
+3. Generate UDP traffic, for example DNS queries.
+4. Capture around 100 packets and stop the capture.
+5. Apply display filter: udp
+6. Select one UDP packet.
+7. Expand User Datagram Protocol.
+8. Note Source Port, Destination Port, Length and Checksum.
+9. Select Statistics -> Flow Graph.
+
+EXPECTED OUTPUT:
+UDP packets are displayed with their source port, destination port, length and checksum.
+
+============================================================
+SECTION C - NMAP HOST DISCOVERY
+============================================================
+
+GENERAL NMAP PROCEDURE
+----------------------
+1. Open Command Prompt or terminal.
+2. Ensure Nmap is installed.
+3. Open terminal with administrator privileges if required.
+4. Enter the Nmap command with the target subnet or IP range.
+5. Observe the live hosts in the output.
+6. Record the command and discovered IP addresses.
+
+Use Nmap only on networks you own or have permission to scan.
+
+------------------------------------------------------------
+24. NMAP - ARP HOST DISCOVERY
+------------------------------------------------------------
+AIM:
+To discover live hosts in a subnet using an ARP scan.
+
+COMMAND:
+nmap -PR -sn 192.168.1.0/24
+
+PROCEDURE:
+1. Open Command Prompt as administrator.
+2. Enter the command above.
+3. Wait for the scan to complete.
+4. Record the live hosts shown in the output.
+5. Explain why ARP is used on the local subnet.
+
+EXPECTED OUTPUT:
+Nmap lists hosts that respond to ARP discovery.
+VIVA POINT: On a local Ethernet subnet, ARP resolves the target IPv4 address to a MAC address. ARP discovery is generally effective on the local network.
+
+------------------------------------------------------------
+25. NMAP - ICMP HOST DISCOVERY
+------------------------------------------------------------
+AIM:
+To discover live hosts using ICMP Echo, Timestamp and Address Mask probes.
+
+COMMANDS:
+nmap -PE -sn 192.168.1.0/24
+nmap -PP -sn 192.168.1.0/24
+nmap -PM -sn 192.168.1.0/24
+
+PROCEDURE:
+1. Open Command Prompt as administrator.
+2. Run the ICMP Echo scan using -PE and record live hosts.
+3. Run the ICMP Timestamp scan using -PP and record live hosts.
+4. Run the ICMP Address Mask scan using -PM and record live hosts.
+5. Compare the results of all three scans.
+
+EXPECTED OUTPUT:
+Nmap reports hosts that respond to the selected ICMP discovery probes. Results may differ because firewalls and hosts may block some probe types.
+
+------------------------------------------------------------
+26. NMAP - TCP SYN, TCP ACK AND UDP PING
+------------------------------------------------------------
+AIM:
+To discover live hosts using TCP SYN, TCP ACK and UDP probes.
+
+COMMANDS:
+nmap -PS80 -sn 192.168.1.0/24
+nmap -PA80 -sn 192.168.1.0/24
+nmap -PU53 -sn 192.168.1.0/24
+
+PROCEDURE:
+1. Open Command Prompt as administrator.
+2. Run the TCP SYN ping command using -PS and record live hosts.
+3. Run the TCP ACK ping command using -PA and record live hosts.
+4. Run the UDP ping command using -PU and record live hosts.
+5. Compare the results.
+
+EXPECTED OUTPUT:
+Nmap lists hosts that respond to the selected TCP/UDP discovery probes. A host may not respond if a firewall blocks the probes.
+NOTE: Port 80 and 53 are examples. Use ports specified by your question or instructor.
+
+------------------------------------------------------------
+27. NMAP - REVERSE DNS LOOKUP ON AND OFF
+------------------------------------------------------------
+AIM:
+To compare host discovery with reverse DNS lookup disabled and enabled.
+
+COMMANDS:
+nmap -sn -n 192.168.1.0/24
+nmap -sn -R 192.168.1.0/24
+
+PROCEDURE:
+1. Open Command Prompt.
+2. Run the first command with -n.
+3. Record the host output and scan time.
+4. Run the second command with -R.
+5. Record the host output and scan time.
+6. Compare output and scan time.
+
+EXPECTED OUTPUT:
+-n disables reverse DNS resolution.
+-R forces reverse DNS resolution for targets.
+The scan time may increase when reverse DNS lookups are performed.
+
+------------------------------------------------------------
+28. NMAP - HOST DISCOVERY WITHOUT PORT SCANNING
+------------------------------------------------------------
+AIM:
+To scan a range of IP addresses for live hosts without performing a port scan.
+
+COMMAND:
+nmap -sn 192.168.1.0/24
+
+PROCEDURE:
+1. Open Command Prompt.
+2. Enter the command with the required IP range.
+3. Wait for the scan to complete.
+4. Record the hosts reported as up.
+5. Note that -sn disables port scanning and performs host discovery only.
+
+EXPECTED OUTPUT:
+Nmap displays the live hosts it discovers without scanning their ports.
+
+============================================================
+SECTION D - QUICK REVISION
+============================================================
+
+PACKET TRACER - REMEMBER
+------------------------
+Hub: repeats incoming signal to all other ports.
+Switch: learns MAC addresses and forwards frames based on its MAC table.
+Router: connects different IP networks.
+Default Gateway: router interface address used to reach another network.
+Static Route: manually configured route.
+RIP: dynamic distance-vector routing protocol.
+DHCP: automatically assigns IP configuration.
+PDU: Packet Tracer tool used to send a test packet.
+
+COMMON ROUTER CLI COMMANDS
+--------------------------
+enable
+configure terminal
+interface fastethernet 0/0
+ip address <IP> <MASK>
+no shutdown
+exit
+ip route <NETWORK> <MASK> <NEXT-HOP>
+show ip interface brief
+show ip route
+show running-config
+ping <IP>
+
+WIRESHARK FILTERS
+-----------------
+tcp
+udp
+arp
+dns
+http
+icmp
+dhcp
+
+WIRESHARK MENU
+--------------
+Flow Graph: Statistics -> Flow Graph
+TCP conversation: Right-click packet -> Follow -> TCP Stream
+Save capture: File -> Save As
+
+NMAP FLAGS
+----------
+-PR = ARP discovery
+-PE = ICMP Echo discovery
+-PP = ICMP Timestamp discovery
+-PM = ICMP Address Mask discovery
+-PS = TCP SYN discovery
+-PA = TCP ACK discovery
+-PU = UDP discovery
+-sn = Host discovery; no port scan
+-n  = Disable reverse DNS lookup
+-R  = Force reverse DNS lookup
+
+FINAL PRACTICAL CHECKLIST
+-------------------------
+[ ] Identify the tool: Packet Tracer, Wireshark or Nmap.
+[ ] Identify the topology or capture requirement.
+[ ] Note every IP address and subnet mask from the question.
+[ ] Connect the correct devices and cables.
+[ ] Configure default gateways when different networks communicate.
+[ ] Use Simulation mode and Simple PDU when asked.
+[ ] Use the exact Wireshark display filter.
+[ ] Use the exact Nmap flags and target subnet.
+[ ] Record the output and one or two observations.
+[ ] Save the Packet Tracer file or Wireshark capture if asked.
+
+END OF QUESTION 1 GUIDE
